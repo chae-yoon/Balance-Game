@@ -1,7 +1,21 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  index
+  <h1>Index</h1>
   {{ request.user }}
+
+  {% for post in posts %}
+    <p>
+      작성자 - 
+      {{ post.user }}
+    </p>
+    <a href='{% url 'posts:detail' post.pk %}'>
+      제목 - 
+      {{ post.title }}
+    </a>
+
+    <hr>
+
+  {% endfor %}
 {% endblock content %}
 
