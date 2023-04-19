@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Detail</h1>
+
+  <p class="">
+    작성자 - 
+    {{ post.user }}
+  </p>
+  <p class="">
+    제목 - 
+    {{ post.title }}
+  </p>
+  <button class="">{{ post.select1_content }}</button>
+  <button class="">{{ post.select2_content }}</button>
+{% endblock content %}
