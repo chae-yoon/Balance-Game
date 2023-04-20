@@ -89,7 +89,6 @@ def comment_create(request, post_pk):
     return redirect('posts:detail', post.pk)
 
 
-@login_required
 def comment_delete(request, post_pk, comment_pk):
     comment = Comment.objects.get(pk=comment_pk)
 
@@ -97,3 +96,17 @@ def comment_delete(request, post_pk, comment_pk):
         comment.delete()
     return redirect('posts:detail', post_pk)
     
+@login_required
+def comment_like(request, post_pk, comment_pk):
+    comment = Comment.objects.get(pk=comment_pk)
+    if comment.like_users.filter(pk=request.user.pk).exists():
+        comment.like_users.remove(request.user)
+        is_liked = False
+    else:
+        comment.like_users.add(request.user)
+        is_liked = True
+    context = {
+        'is_liked': is_liked,
+        'likes_count': comment.like_users.count(),
+    }
+    return JsonResponse(context)

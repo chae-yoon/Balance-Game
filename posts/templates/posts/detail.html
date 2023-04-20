@@ -14,8 +14,9 @@
   </p>
 
   {% comment %} post.likes {% endcomment %}
-  <p>좋아요 수 - <span id="likes-count">{{ post.like_users.count }}</span></p>
-  <form id="like-form" data-post-id="{{ post.pk }}" class="mb-3">
+
+  <p>좋아요 수 - <span id="post-likescount">{{ post.like_users.count }}</span></p>
+  <form id="post-likeform" data-post-id="{{ post.pk }}">
     {% csrf_token %}
     {% if request.user.is_authenticated %}
       {% if request.user in post.like_users.all %}
@@ -75,11 +76,22 @@
   <hr>
 
   {% for comment in comments %}
-    <p>
-      작성자 - 
-      <a href="{% url 'accounts:profile' comment.user %}">{{ comment.user }}</a>
-    </p>
+
+    <p>작성자 - {{ comment.user }} / 좋아요 수 - <span class="like-{{ comment.pk }}">{{ comment.like_users.count }}</span></p>
+
     <p>{{ comment.content }}</p>
+
+    {% if request.user.is_authenticated %}
+      <form class="comment-likeform" id="commentlike-{{ comment.pk }}" data-comment-id="{{ comment.pk }}" data-post-id="{{ post.pk }}">
+        {% csrf_token %}
+        {% if request.user in comment.like_users.all %}
+          <input type="submit" value="댓글 좋아요 취소">
+        {% else %}
+          <input type="submit" value="댓글 좋아요">
+        {% endif %}
+      </form>
+    {% endif %}
+
     {% if request.user == comment.user %}
       <form action="{% url 'posts:comment_delete' post.pk comment.pk %}" method="POST">
         {% csrf_token %}
@@ -90,10 +102,11 @@
     <hr>
   {% endfor %}
   <script>
-    const form = document.querySelector('#like-form')
+    const postform = document.querySelector('#post-likeform')
+    const commentforms = document.querySelectorAll('.comment-likeform')
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
 
-    form.addEventListener('submit', function (event) {
+    postform.addEventListener('submit', function (event) {
       event.preventDefault()
       const postId = event.target.dataset.postId
       axios({
@@ -103,20 +116,51 @@
       })
         .then((response) => {
           const isLiked = response.data.is_liked
-          const likeBtn = document.querySelector('#like-form > input[type=submit]')
+          const postlikesCountTag = document.querySelector('#post-likescount')
+          const postlikesCountData = response.data.likes_count
+          const likeBtn = document.querySelector('#post-likeform > input[type=submit]')
+          
           if (isLiked === true) {
             likeBtn.value = '좋아요 취소'
           } else {
             likeBtn.value = '좋아요'
           }
-          const likesCountTag = document.querySelector('#likes-count')
-          const likesCountData = response.data.likes_count
         
-          likesCountTag.textContent = likesCountData
+          postlikesCountTag.textContent = postlikesCountData
         })
         .catch((error) => {
           console.log(error.response)
         })
+    })
+
+    commentforms.forEach((commentform) => {
+      commentform.addEventListener('submit', function (event) {
+        event.preventDefault()
+        const commentId = event.target.dataset.commentId
+        const postId = event.target.dataset.postId
+        axios({
+          method:'post',
+          url:`/posts/${postId}/comments/${commentId}/likes/`,
+          headers: {'X-CSRFToken': csrftoken},
+        })
+          .then((response) => {
+            const isLiked = response.data.is_liked
+            const commentLikesCountTag = document.querySelector(`.like-${commentId}`)
+            const commentLikesCountData = response.data.likes_count
+            const likeBtn = document.querySelector(`#commentlike-${commentId} > input[type=submit]`)
+            
+            if (isLiked) {
+              likeBtn.value = "댓글 좋아요 취소"
+            } else {
+              likeBtn.value = "댓글 좋아요"
+            }
+            commentLikesCountTag.textContent = commentLikesCountData
+          })
+          .catch((error) => {
+            console.log(error.response)
+          })
+      })
+
     })
   </script>
 {% endblock content %}
