@@ -4,7 +4,7 @@
 
   <p class="">
     작성자 - 
-    {{ post.user }}
+    <a href="{% url 'accounts:profile' post.user.username %}">{{ post.user }}</a>
   </p>
   <p class="">
     제목 - 

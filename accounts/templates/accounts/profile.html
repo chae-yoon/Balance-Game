@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{person.username}}'s 프로필</h1>
+{% if request.user == person %}
+  <a href="{% url 'accounts:update' %}">정보 수정</a>
+  <a href="{% url 'accounts:change_password' %}">비밀번호 변경</a>
+{% endif %}
+<p>
+  팔로잉 수 : {{ person.followings.all|length }} / 팔로워 수 : {{ person.followers.all|length}}
+</p>
+<form action="{% url 'accounts:follows' person.pk %}" method="POST">
+  {% csrf_token %}
+  {% if request.user != person %}
+    {% if request.user.is_authenticated %}
+      {% if request.user in person.followers.all %}
+        <input type="submit" value="Unfollow">
+      {% else %}
+        <input type="submit" value="Follow">
+      {% endif %}
+    {% else %}
+      <input type="submit" value="Follow" disabled>
+    {% endif %}
+  {% endif %}
+</form>
+<hr>
+<h2>작성한 글</h2>
+{% for post in person.post_set.all %}
+<div>
+  <a href='{% url 'posts:detail' post.pk %}'>
+    제목 - 
+    {{ post.title }}
+  </a>
+</div>
+{% endfor %}
+<hr>
+<h2>팔로잉 목록</h2>
+{% for following in person.followings.all %}
+<div>
+  <a href="{% url 'accounts:profile' following.username %}">{{ following.username }}</a>
+</div>
+{% empty %}
+  <p>팔로잉 한 사람이 없습니다.</p>
+{% endfor %}
+<hr>
+<h2>팔로워 목록</h2>
+{% for follower in person.followers.all %}
+<div>
+  <a href="{% url 'accounts:profile' follower.username %}">{{ follower.username }}</a>
+</div>
+{% empty %}
+  <p>팔로워 한 사람이 없습니다.</p>
+{% endfor %}
+<hr>
+{% endblock content %}
