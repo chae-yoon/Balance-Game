@@ -11,7 +11,7 @@
     " class="user-link">
     {{ request.user }}</a> 님 안녕하세요 ! </span>
     <div>
-    {% if request.user.is_authenticated %}
+    {% comment %} {% if request.user.is_authenticated %}
       <form action="{% url 'accounts:logout' %}" method="post" class="">
         {% csrf_token %}
         <input type="submit" value="로그아웃" class="btn btn-outline-danger">
@@ -23,7 +23,7 @@
       <a href="{% url 'accounts:signup' %}" class="btn btn-primary">
         회원가입
       </a>
-    {% endif %}
+    {% endif %} {% endcomment %}
     </div>
   </div>
   <hr>
