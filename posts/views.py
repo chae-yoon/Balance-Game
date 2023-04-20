@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from .models import Post
 from .forms import PostForm
 from django.contrib.auth.decorators import login_required
@@ -49,3 +50,19 @@ def answer(request, post_pk, answer):
             post.select2_user.add(request.user)
     
     return redirect('posts:detail', post_pk)
+
+@login_required
+def post_like(request, post_pk):
+    post = Post.objects.get(pk=post_pk)
+    if post.like_users.filter(pk=request.user.pk).exists():
+        post.like_users.remove(request.user)
+        is_liked = False
+    else:
+        post.like_users.add(request.user)
+        is_liked = True
+    
+    context = {
+        'is_liked': is_liked,
+        'likes_count': post.like_users.count(),
+    }
+    return JsonResponse(context)

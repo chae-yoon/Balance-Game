@@ -10,6 +10,22 @@
     제목 - 
     {{ post.title }}
   </p>
+
+  {% comment %} post.likes {% endcomment %}
+  <p>좋아요 수 - <span id="likes-count">{{ post.like_users.count }}</span></p>
+  <form id="like-form" data-post-id="{{ post.pk }}">
+    {% csrf_token %}
+    {% if request.user.is_authenticated %}
+      {% if request.user in post.like_users.all %}
+        <input type="submit" value="좋아요 취소">
+      {% else %}
+        <input type="submit" value="좋아요">
+      {% endif %}
+    {% else %}
+      <button disabled="disabled">좋아요</button>      
+    {% endif %}
+  </form>
+
   <form action="{% url 'posts:answer' post.pk post.select1_content %}" method="post">
     {% csrf_token %}
     <button type="submit" class="">{{ post.select1_content }}-{{ post.select1_user.all.count }}</button>
@@ -18,4 +34,35 @@
     {% csrf_token %}
     <button type="submit" class="">{{ post.select2_content }}-{{ post.select2_user.all.count }}</button>
   </form>
+
+  <script>
+    const form = document.querySelector('#like-form')
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault()
+      const postId = event.target.dataset.postId
+      axios({
+        method: 'post',
+        url: `/posts/${postId}/likes/`,
+        headers: {'X-CSRFToken': csrftoken},
+      })
+        .then((response) => {
+          const isLiked = response.data.is_liked
+          const likeBtn = document.querySelector('#like-form > input[type=submit]')
+          if (isLiked === true) {
+            likeBtn.value = '좋아요 취소'
+          } else {
+            likeBtn.value = '좋아요'
+          }
+          const likesCountTag = document.querySelector('#likes-count')
+          const likesCountData = response.data.likes_count
+        
+          likesCountTag.textContent = likesCountData
+        })
+        .catch((error) => {
+          console.log(error.response)
+        })
+    })
+  </script>
 {% endblock content %}
