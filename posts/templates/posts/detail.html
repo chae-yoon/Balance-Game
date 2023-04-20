@@ -79,10 +79,10 @@
 
     <p>작성자 - {{ comment.user }} / 좋아요 수 - <span class="like-{{ comment.pk }}">{{ comment.like_users.count }}</span></p>
 
-    <p>{{ comment.content }}</p>
+    <p id="comment-content-{{ comment.pk }}">{{ comment.content }}</p>
 
     {% if request.user.is_authenticated %}
-      <form class="comment-likeform" id="commentlike-{{ comment.pk }}" data-comment-id="{{ comment.pk }}" data-post-id="{{ post.pk }}">
+      <form class="comment-likeform mb-2" id="commentlike-{{ comment.pk }}" data-comment-id="{{ comment.pk }}" data-post-id="{{ post.pk }}">
         {% csrf_token %}
         {% if request.user in comment.like_users.all %}
           <input type="submit" value="댓글 좋아요 취소">
@@ -92,12 +92,24 @@
       </form>
     {% endif %}
 
-    {% if request.user == comment.user %}
-      <form action="{% url 'posts:comment_delete' post.pk comment.pk %}" method="POST">
-        {% csrf_token %}
-        <input type="submit" value="댓글 삭제">
-      </form>
-    {% endif %}
+
+    <div class="">
+      {% if request.user == comment.user %}
+        <div class="d-flex">
+          <form action="{% url 'posts:comment_delete' post.pk comment.pk %}" method="POST" class="me-3">
+            {% csrf_token %}
+            <input type="submit" value="댓글 삭제">
+          </form>
+          <input type="button" value="댓글 수정" class="comment-edit-btn" data-post-id="{{ post.pk }}" data-comment-id="{{ comment.pk }}">
+        </div>
+        <form class="comment-edit-form my-3" id="comment-edit-form-{{ comment.pk }}" data-post-id="{{ post.pk }}" data-comment-id="{{ comment.pk }}" hidden>
+          {% csrf_token %}
+          {{ comment_form.as_p }}
+          <input type="submit" value="수정" class="update">
+          <input type="button" value="취소" class="cancel" data-comment-id="{{ comment.pk }}">
+        </form>
+      {% endif %}
+    </div>
     
     <hr>
   {% endfor %}
@@ -106,6 +118,7 @@
     const commentforms = document.querySelectorAll('.comment-likeform')
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
 
+    // Post 좋아요
     postform.addEventListener('submit', function (event) {
       event.preventDefault()
       const postId = event.target.dataset.postId
@@ -133,6 +146,7 @@
         })
     })
 
+    // Comment 좋아요
     commentforms.forEach((commentform) => {
       commentform.addEventListener('submit', function (event) {
         event.preventDefault()
@@ -162,5 +176,51 @@
       })
 
     })
+
+    // 댓글 수정
+    const commentUpdates = document.querySelectorAll('.comment-edit-btn')
+
+    commentUpdates.forEach((comment) => {
+      comment.addEventListener('click', (event) => {
+        const commentId = event.target.dataset.commentId
+        const commentUpdateDiv = document.querySelector(`#comment-edit-form-${commentId}`)
+        const contentTextArea = document.querySelector(`#comment-edit-form-${commentId}>p>textarea`)
+        commentUpdateDiv.hidden = false
+        contentTextArea.textContent = document.querySelector(`#comment-content-${commentId}`).textContent
+      })
+    })
+    
+    const commentUpdateConfirms = document.querySelectorAll('.comment-edit-form>.update')
+    commentUpdateConfirms.forEach((updateBtn) => {
+      updateBtn.addEventListener('submit', (event) => {
+        event.preventDefault()
+        const postId = event.target.dataset.postId
+        const commentId = event.target.dataset.commentId
+        axios({
+          method:'post',
+          url:`/posts/${postId}/comments/${commentId}/update/`,
+          headers: {'X-CSRFToken': csrftoken},
+        })
+          .then((response) => {
+            const updateComment = response.data.content
+            const test = response.data.test
+            console.log(response)
+          })
+          .catch((error) => {
+            console.log(error.response)
+          })
+      })
+    })
+
+    const commentUpdateCancels = document.querySelectorAll('.comment-edit-form>.cancel')
+    commentUpdateCancels.forEach((cancelBtn) => {
+      cancelBtn.addEventListener('click', (event) => {
+        const commentId = event.target.dataset.commentId
+        const commentUpdateForm = document.querySelector(`#comment-edit-form-${commentId}`)
+        commentUpdateForm.hidden = true
+      })
+    })
+
+
   </script>
 {% endblock content %}

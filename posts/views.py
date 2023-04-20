@@ -85,7 +85,7 @@ def comment_create(request, post_pk):
         comment = comment_form.save(commit=False)
         comment.post = post
         comment.user = request.user
-        comment.save()
+        comment.save()  
     return redirect('posts:detail', post.pk)
 
 
@@ -95,6 +95,7 @@ def comment_delete(request, post_pk, comment_pk):
     if request.user == comment.user:
         comment.delete()
     return redirect('posts:detail', post_pk)
+    
     
 @login_required
 def comment_like(request, post_pk, comment_pk):
@@ -108,5 +109,21 @@ def comment_like(request, post_pk, comment_pk):
     context = {
         'is_liked': is_liked,
         'likes_count': comment.like_users.count(),
+    }
+    return JsonResponse(context)
+
+
+def comment_update(request, post_pk, comment_pk):
+    print(111111)
+    comment = Comment.objects.get(pk=comment_pk)
+    
+    if request.user == comment.user:
+        comment_form = CommentForm(data=request.POST, instance=comment)
+        if comment_form.is_valid():
+            comment = comment_form.save()
+    
+    context = {
+        'content': comment.content,
+        'test': request.POST.get('content'),
     }
     return JsonResponse(context)
