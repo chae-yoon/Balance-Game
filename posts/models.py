@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from imagekit.models import ProcessedImageField
+from imagekit.processors import ResizeToFill
 
 # Create your models here.
 class Post(models.Model):
@@ -9,3 +11,11 @@ class Post(models.Model):
     select2_content = models.CharField(max_length=20)
     select1_user = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='select1')
     select2_user = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='select2')
+    select1_image = ProcessedImageField(blank=True, upload_to='select_image',
+                                        processors=[ResizeToFill(100,100)],
+                                        format='PNG',
+                                        options={'quality': 80})
+    select2_image = ProcessedImageField(blank=True, upload_to='select_image',
+                                        processors=[ResizeToFill(100,100)],
+                                        format='PNG',
+                                        options={'quality': 80})
