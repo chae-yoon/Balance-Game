@@ -114,13 +114,15 @@ def comment_like(request, post_pk, comment_pk):
 
 
 def comment_update(request, post_pk, comment_pk):
-    print(111111)
     comment = Comment.objects.get(pk=comment_pk)
     
+    data = request.POST
+    print(f'comment : {data}')
     if request.user == comment.user:
-        comment_form = CommentForm(data=request.POST, instance=comment)
+        comment_form = CommentForm(request.POST, instance=comment)
         if comment_form.is_valid():
             comment = comment_form.save()
+            print(f'comment : {comment.content}')
     
     context = {
         'content': comment.content,

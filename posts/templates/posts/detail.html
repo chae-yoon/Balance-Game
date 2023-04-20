@@ -190,21 +190,25 @@
       })
     })
     
-    const commentUpdateConfirms = document.querySelectorAll('.comment-edit-form>.update')
+    const commentUpdateConfirms = document.querySelectorAll('.comment-edit-form')
     commentUpdateConfirms.forEach((updateBtn) => {
       updateBtn.addEventListener('submit', (event) => {
         event.preventDefault()
         const postId = event.target.dataset.postId
         const commentId = event.target.dataset.commentId
+        const h1Tag = document.createElement('h1')
+        const newText = document.querySelector(`#comment-edit-form-${commentId}>p>textarea`).textContent
+        console.log(newText)
         axios({
           method:'post',
           url:`/posts/${postId}/comments/${commentId}/update/`,
           headers: {'X-CSRFToken': csrftoken},
+          data: JSON.stringify(newText),
         })
           .then((response) => {
             const updateComment = response.data.content
             const test = response.data.test
-            console.log(response)
+            console.log(response.data)
           })
           .catch((error) => {
             console.log(error.response)
