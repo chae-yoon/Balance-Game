@@ -37,3 +37,15 @@ def detail(request, post_pk: int):
         'post': post,
     }
     return render(request, 'posts/detail.html', context)
+
+@login_required
+def answer(request, post_pk, answer):
+    post = Post.objects.get(pk=post_pk)
+
+    if request.user not in post.select1_user.all() and request.user not in post.select2_user.all():
+        if answer == post.select1_content:
+            post.select1_user.add(request.user)
+        elif answer == post.select2_content:
+            post.select2_user.add(request.user)
+    
+    return redirect('posts:detail', post_pk)
