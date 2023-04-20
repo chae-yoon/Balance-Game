@@ -15,7 +15,7 @@ def index(request):
 @login_required
 def create(request):
     if request.method == 'POST':
-        form = PostForm(request.POST)
+        form = PostForm(data=request.POST, files=request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
             post.user = request.user
