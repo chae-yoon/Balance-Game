@@ -2,17 +2,47 @@
 
 {% block content %}
   <h1>Index</h1>
-  {{ request.user }}
+  
+  <div>
+    <a href="
+    {% if request.user.is_authenticated %}
+      {% url 'accounts:profile' request.user %}
+    {% endif %}
+    ">
+    {{ request.user }}</a>
+  </div>
+  
+  <div>
+    {% if request.user.is_authenticated %}
+      <form action="{% url 'accounts:logout' %}" method="post" class="">
+        {% csrf_token %}
+        <input type="submit" value="로그아웃" class="">
+      </form>
+    {% else %}
+      <a href="{% url 'accounts:login' %}" class="">
+        로그인
+      </a>
+      <a href="{% url 'accounts:signup' %}" class="">
+        회원가입
+      </a>
+    {% endif %}
+  </div>
+
+  <div class="">
+    <a href="{% url 'posts:create' %}">주제 생성</a>
+  </div>
 
   {% for post in posts %}
     <p>
       작성자 - 
       <a href="{% url 'accounts:profile' post.user.username %}">{{ post.user }}</a>
     </p>
-    <a href='{% url 'posts:detail' post.pk %}'>
-      제목 - 
-      {{ post.title }}
-    </a>
+    <p>
+      <span class="">제목 - </span>
+      <a href='{% url 'posts:detail' post.pk %}'>
+        {{ post.title }}
+      </a>
+    </p>
 
     <hr>
 
