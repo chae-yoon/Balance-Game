@@ -13,6 +13,10 @@ def index(request):
     return render(request, 'posts/index.html', context)
 
 
+def redirect_index(request):
+    return redirect('posts:index')
+
+
 @login_required
 def create(request):
     if request.method == 'POST':
@@ -42,6 +46,7 @@ def detail(request, post_pk: int):
     }
     return render(request, 'posts/detail.html', context)
 
+
 @login_required
 def answer(request, post_pk, answer):
     post = Post.objects.get(pk=post_pk)
@@ -53,6 +58,7 @@ def answer(request, post_pk, answer):
             post.select2_user.add(request.user)
     
     return redirect('posts:detail', post_pk)
+
 
 @login_required
 def post_like(request, post_pk):
@@ -70,6 +76,7 @@ def post_like(request, post_pk):
     }
     return JsonResponse(context)
 
+
 @login_required
 def comment_create(request, post_pk):
     post = Post.objects.get(pk=post_pk)
@@ -80,6 +87,7 @@ def comment_create(request, post_pk):
         comment.user = request.user
         comment.save()
     return redirect('posts:detail', post.pk)
+
 
 def comment_delete(request, post_pk, comment_pk):
     comment = Comment.objects.get(pk=comment_pk)
