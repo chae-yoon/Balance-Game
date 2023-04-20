@@ -2,3 +2,16 @@
   width: 40vw;
   height: 40vw;
 }
+
+a {
+  text-decoration-line: none;
+}
+
+.user-link {
+  color: black;
+}
+
+.user-link:hover {
+  text-decoration-line: underline;
+}
+

@@ -3,33 +3,32 @@
 {% block content %}
   <h1>Index</h1>
   
-  <div>
-    <a href="
+  <div class="d-flex justify-content-between">
+    <span><a href="
     {% if request.user.is_authenticated %}
       {% url 'accounts:profile' request.user %}
     {% endif %}
-    ">
-    {{ request.user }}</a>
-  </div>
-  
-  <div>
+    " class="user-link">
+    {{ request.user }}</a> 님 안녕하세요 ! </span>
+    <div>
     {% if request.user.is_authenticated %}
       <form action="{% url 'accounts:logout' %}" method="post" class="">
         {% csrf_token %}
-        <input type="submit" value="로그아웃" class="">
+        <input type="submit" value="로그아웃" class="btn btn-outline-danger">
       </form>
     {% else %}
-      <a href="{% url 'accounts:login' %}" class="">
+      <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary">
         로그인
       </a>
-      <a href="{% url 'accounts:signup' %}" class="">
+      <a href="{% url 'accounts:signup' %}" class="btn btn-primary">
         회원가입
       </a>
     {% endif %}
+    </div>
   </div>
-
-  <div class="">
-    <a href="{% url 'posts:create' %}">주제 생성</a>
+  <hr>
+  <div class="mb-3">
+    <a href="{% url 'posts:create' %}" class="btn btn-outline-success">주제 생성</a>
   </div>
 
   {% for post in posts %}
