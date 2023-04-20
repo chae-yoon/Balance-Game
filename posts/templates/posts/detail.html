@@ -35,6 +35,22 @@
     <button type="submit" class="">{{ post.select2_content }}-{{ post.select2_user.all.count }}</button>
   </form>
 
+  <form action="{% url 'posts:comment_create' post.pk %}" method="POST">
+    {% csrf_token %}
+    {{ comment_form.as_p }}
+    <input type="submit" value="댓글 작성">
+  </form>
+
+  {% for comment in comments %}
+    <p>작성자 - {{ comment.user }}</p>
+    <p>{{ comment.content }}</p>
+    {% if request.user == comment.user %}
+      <form action="{% url 'posts:comment_delete' post.pk comment.pk %}" method="POST">
+        {% csrf_token %}
+        <input type="submit" value="댓글 삭제">
+      </form>
+    {% endif %}
+  {% endfor %}
   <script>
     const form = document.querySelector('#like-form')
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value

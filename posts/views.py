@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from .models import Post
-from .forms import PostForm
+from .models import Post, Comment
+from .forms import PostForm, CommentForm
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
@@ -33,9 +33,12 @@ def create(request):
 
 def detail(request, post_pk: int):
     post = Post.objects.get(pk=post_pk)
-    
+    comments = Comment.objects.all()
+    comment_form = CommentForm()
     context = {
         'post': post,
+        'comment_form': comment_form,
+        'comments': comments,
     }
     return render(request, 'posts/detail.html', context)
 
@@ -66,3 +69,23 @@ def post_like(request, post_pk):
         'likes_count': post.like_users.count(),
     }
     return JsonResponse(context)
+
+@login_required
+def comment_create(request, post_pk):
+    post = Post.objects.get(pk=post_pk)
+    comment_form = CommentForm(request.POST)
+    if comment_form.is_valid():
+        comment = comment_form.save(commit=False)
+        comment.post = post
+        comment.user = request.user
+        comment.save()
+    return redirect('posts:detail', post.pk)
+
+@login_required
+def comment_delete(request, post_pk, comment_pk):
+    comment = Comment.objects.get(pk=comment_pk)
+
+    if request.user == comment.user:
+        comment.delete()
+    return redirect('posts:detail', post_pk)
+    
