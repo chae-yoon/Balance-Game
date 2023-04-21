@@ -76,19 +76,7 @@
   <hr>
 
   {% for comment in comments %}
-
-    <div class="d-flex justify-content-between">
-      <p>작성자 - {{ comment.user }}</p>
-      <div>
-        {% if request.user == comment.user %}
-          <form action="{% url 'posts:comment_delete' post.pk comment.pk %}" method="POST">
-            {% csrf_token %}
-            <input type="submit" value="댓글 삭제" class="btn btn-sm btn-outline-danger" onclick="return confirm('삭제하시겠습니까?')">
-          </form>
-        {% endif %}
-      </div>
-    </div>
-
+    <p>작성자 - {{ comment.user }}</p>
     <p id="comment-content-{{ comment.pk }}">{{ comment.content }}</p>
 
    {% if request.user.is_authenticated %}
@@ -110,15 +98,15 @@
         <div class="d-flex">
           <form action="{% url 'posts:comment_delete' post.pk comment.pk %}" method="POST" class="me-3">
             {% csrf_token %}
-            <input type="submit" value="댓글 삭제">
+            <input type="submit" value="댓글 삭제" class="btn btn-sm btn-outline-danger" onclick="return confirm('삭제하시겠습니까?')">
           </form>
-          <input type="button" value="댓글 수정" class="comment-edit-btn" data-post-id="{{ post.pk }}" data-comment-id="{{ comment.pk }}">
+          <input type="button" value="댓글 수정" class="comment-edit-btn btn btn-sm btn-outline-primary" data-post-id="{{ post.pk }}" data-comment-id="{{ comment.pk }}">
         </div>
         <form class="comment-edit-form my-3" id="comment-edit-form-{{ comment.pk }}" data-post-id="{{ post.pk }}" data-comment-id="{{ comment.pk }}" hidden>
           {% csrf_token %}
-          {{ comment_form.as_p }}
-          <input type="submit" value="수정" class="update">
-          <input type="button" value="취소" class="cancel" data-comment-id="{{ comment.pk }}">
+          {{ comment_updateform.as_p }}
+          <input type="submit" value="수정" class="update btn btn-sm btn-outline-primary">
+          <input type="button" value="취소" class="cancel btn btn-sm btn-outline-secondary" data-comment-id="{{ comment.pk }}">
         </form>
       {% endif %}
     </div>

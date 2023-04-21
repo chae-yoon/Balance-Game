@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .models import Post, Comment
-from .forms import PostForm, CommentForm
+from .forms import PostForm, CommentForm, CommentUpdateForm
 from django.contrib.auth.decorators import login_required
 import json
 
@@ -38,12 +38,14 @@ def create(request):
 
 def detail(request, post_pk: int):
     post = Post.objects.get(pk=post_pk)
-    comments = Comment.objects.all()
+    comments = post.comment_set.all()
     comment_form = CommentForm()
+    comment_updateform = CommentUpdateForm()
     context = {
         'post': post,
         'comment_form': comment_form,
         'comments': comments,
+        'comment_updateform': comment_updateform,
     }
     return render(request, 'posts/detail.html', context)
 
