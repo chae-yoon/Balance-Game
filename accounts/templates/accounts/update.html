@@ -5,6 +5,6 @@
 <form action="{% url 'accounts:update' %}" method="post">
   {% csrf_token %}
   {{ form.as_p }}
-  <input type="submit" value="Change">
+  <input type="submit" value="변경하기" class="btn btn-primary">
 </form>
 {% endblock content %}

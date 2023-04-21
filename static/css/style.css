@@ -1,4 +1,43 @@
+/* base.html */
+nav {
+  height: 70px;
+}
+
+.nav-aria {
+  max-width: 1200px;
+}
+
+.profile-bg {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.profile-list {
+  margin-top: .25rem;
+}
+
+.profile-list li {
+  white-space: nowrap;
+}
+
 .select-image {
   width: 40vw;
   height: 40vw;
 }
+
+a {
+  text-decoration-line: none;
+}
+
+.user-link {
+  color: black;
+}
+
+.user-link:hover {
+  text-decoration-line: underline;
+}
+

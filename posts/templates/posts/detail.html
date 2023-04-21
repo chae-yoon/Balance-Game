@@ -15,18 +15,18 @@
 
   {% comment %} post.likes {% endcomment %}
 
-  <p>좋아요 수 - <span id="post-likescount">{{ post.like_users.count }}</span></p>
   <form id="post-likeform" data-post-id="{{ post.pk }}">
     {% csrf_token %}
     {% if request.user.is_authenticated %}
       {% if request.user in post.like_users.all %}
-        <input type="submit" value="좋아요 취소">
+        <button type="submit" class=" btn btn-link text-danger"><i class="bi bi-heart-fill"></i></button>
       {% else %}
-        <input type="submit" value="좋아요">
+        <button type="submit" class=" btn btn-link text-danger"><i class="bi bi-heart"></i></button>
       {% endif %}
     {% else %}
-      <button disabled="disabled">좋아요</button>      
+      <button type="submit" class=" btn btn-link text-danger" disabled="disabled"><i class="bi bi-heart"></i></button>  
     {% endif %}
+    <span id="post-likescount">{{ post.like_users.count }}</span>
   </form>
 
   <div class="d-flex justify-content-center">
@@ -39,7 +39,7 @@
       {% endif %}
       <form action="{% url 'posts:answer' post.pk post.select1_content %}" method="post">
         {% csrf_token %}
-        <button type="submit" class="container-fluid rounded-3"
+        <button type="submit" class="container-fluid rounded-3 btn btn-sm btn-primary ps-1 pe-1"
         {% if request.user in post.select1_user.all or request.user in post.select2_user.all %}
           disabled="disabled"
         {% endif %}
@@ -55,7 +55,7 @@
       {% endif %}
       <form action="{% url 'posts:answer' post.pk post.select2_content %}" method="post">
         {% csrf_token %}
-        <button type="submit" class="container-fluid rounded-3"
+        <button type="submit" class="container-fluid rounded-3 btn btn-sm btn-secondary ps-1 pe-1"
         {% if request.user in post.select1_user.all or request.user in post.select2_user.all %}
           disabled="disabled"
         {% endif %}
@@ -70,28 +70,40 @@
   <form action="{% url 'posts:comment_create' post.pk %}" method="POST">
     {% csrf_token %}
     {{ comment_form.as_p }}
-    <input type="submit" value="댓글 작성">
+    <input type="submit" value="댓글 작성" class="btn btn-sm btn-outline-primary">
   </form>
 
   <hr>
 
   {% for comment in comments %}
 
-    <p>작성자 - {{ comment.user }} / 좋아요 수 - <span class="like-{{ comment.pk }}">{{ comment.like_users.count }}</span></p>
+    <div class="d-flex justify-content-between">
+      <p>작성자 - {{ comment.user }}</p>
+      <div>
+        {% if request.user == comment.user %}
+          <form action="{% url 'posts:comment_delete' post.pk comment.pk %}" method="POST">
+            {% csrf_token %}
+            <input type="submit" value="댓글 삭제" class="btn btn-sm btn-outline-danger" onclick="return confirm('삭제하시겠습니까?')">
+          </form>
+        {% endif %}
+      </div>
+    </div>
 
     <p id="comment-content-{{ comment.pk }}">{{ comment.content }}</p>
 
-    {% if request.user.is_authenticated %}
-      <form class="comment-likeform mb-2" id="commentlike-{{ comment.pk }}" data-comment-id="{{ comment.pk }}" data-post-id="{{ post.pk }}">
-        {% csrf_token %}
-        {% if request.user in comment.like_users.all %}
-          <input type="submit" value="댓글 좋아요 취소">
-        {% else %}
-          <input type="submit" value="댓글 좋아요">
-        {% endif %}
-      </form>
-    {% endif %}
-
+   {% if request.user.is_authenticated %}
+       <form class="comment-likeform" id="commentlike-{{ comment.pk }}" data-comment-id="{{ comment.pk }}" data-post-id="{{ post.pk }}">
+         {% csrf_token %}
+         {% if request.user in comment.like_users.all %}
+           <button type="submit" class="btn btn-link text-danger"><i class="bi bi-heart-fill"></i></button>
+         {% else %}
+           <button type="submit" class="btn btn-link text-danger"><i class="bi bi-heart"></i></button>
+         {% endif %}
+     {% else %}
+       <button type="submit" class=" btn btn-link text-danger" disabled="disabled"><i class="bi bi-heart"></i></button> 
+     {% endif %}
+       <span class="like-{{ comment.pk }}">{{ comment.like_users.count }}</span>
+     </form>
 
     <div class="">
       {% if request.user == comment.user %}
@@ -110,7 +122,6 @@
         </form>
       {% endif %}
     </div>
-    
     <hr>
   {% endfor %}
   <script>
@@ -131,12 +142,12 @@
           const isLiked = response.data.is_liked
           const postlikesCountTag = document.querySelector('#post-likescount')
           const postlikesCountData = response.data.likes_count
-          const likeBtn = document.querySelector('#post-likeform > input[type=submit]')
+          const likeBtn = document.querySelector('#post-likeform > button[type=submit] > i')
           
           if (isLiked === true) {
-            likeBtn.value = '좋아요 취소'
+            likeBtn.className = 'bi bi-heart-fill'
           } else {
-            likeBtn.value = '좋아요'
+            likeBtn.className = 'bi bi-heart'
           }
         
           postlikesCountTag.textContent = postlikesCountData
@@ -161,12 +172,12 @@
             const isLiked = response.data.is_liked
             const commentLikesCountTag = document.querySelector(`.like-${commentId}`)
             const commentLikesCountData = response.data.likes_count
-            const likeBtn = document.querySelector(`#commentlike-${commentId} > input[type=submit]`)
+            const likeBtn = document.querySelector(`#commentlike-${commentId} > button[type=submit] > i`)
             
             if (isLiked) {
-              likeBtn.value = "댓글 좋아요 취소"
+              likeBtn.className = 'bi bi-heart-fill'
             } else {
-              likeBtn.value = "댓글 좋아요"
+              likeBtn.className = 'bi bi-heart'
             }
             commentLikesCountTag.textContent = commentLikesCountData
           })
