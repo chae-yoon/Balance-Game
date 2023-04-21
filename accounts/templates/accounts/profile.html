@@ -29,10 +29,10 @@
 <h2>작성한 글</h2>
 {% for post in person.post_set.all %}
 <div>
-  <a href='{% url 'posts:detail' post.pk %}'>
+  <p>
     제목 - 
-    {{ post.title }}
-  </a>
+    <a href='{% url 'posts:detail' post.pk %}'>{{ post.title }}</a>
+  </p>
 </div>
 {% endfor %}
 <hr>

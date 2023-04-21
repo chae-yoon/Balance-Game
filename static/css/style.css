@@ -45,3 +45,10 @@ a {
   text-decoration-line: underline;
 }
 
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.7rem;
+}
