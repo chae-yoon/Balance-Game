@@ -25,7 +25,7 @@
             <span class="fs-6">{{ request.user }}</span>
           </button>
           <div class="list-group position-absolute end-0 profile-list d-none">
-            <a href="{% url 'accounts:profile' request.user.username %}" class="list-group-item">정보수정</a>
+            <a href="{% url 'accounts:profile' request.user.username %}" class="list-group-item">내 프로필</a>
             <a href="{% url 'accounts:logout' %}" class="list-group-item">로그아웃</a>
           </div>
         </div>
@@ -37,7 +37,7 @@
     </div>
     
   </nav>
-  <main class="p-5">
+  <main class="container my-5">
     {% block content %}
     {% endblock content %}
   </main>
