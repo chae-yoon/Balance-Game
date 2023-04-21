@@ -24,6 +24,10 @@ nav {
   white-space: nowrap;
 }
 
+main {
+  max-width: 1200px;
+}
+
 .select-image {
   width: 40vw;
   height: 40vw;
