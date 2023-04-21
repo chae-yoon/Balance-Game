@@ -14,20 +14,21 @@
   </p>
 
   {% comment %} post.likes {% endcomment %}
-
-  <form id="post-likeform" data-post-id="{{ post.pk }}">
-    {% csrf_token %}
-    {% if request.user.is_authenticated %}
-      {% if request.user in post.like_users.all %}
-        <button type="submit" class=" btn btn-link text-danger"><i class="bi bi-heart-fill"></i></button>
+  <div class="mb-2">
+    <form id="post-likeform" data-post-id="{{ post.pk }}">
+      {% csrf_token %}
+      {% if request.user.is_authenticated %}
+        {% if request.user in post.like_users.all %}
+          <button type="submit" class="p-0 btn btn-link text-danger"><i class="bi bi-heart-fill"></i></button>
+        {% else %}
+          <button type="submit" class="p-0 btn btn-link text-danger"><i class="bi bi-heart"></i></button>
+        {% endif %}
       {% else %}
-        <button type="submit" class=" btn btn-link text-danger"><i class="bi bi-heart"></i></button>
+        <button type="submit" class="p-0 btn btn-link text-danger" disabled="disabled"><i class="bi bi-heart"></i></button>  
       {% endif %}
-    {% else %}
-      <button type="submit" class=" btn btn-link text-danger" disabled="disabled"><i class="bi bi-heart"></i></button>  
-    {% endif %}
-    <span id="post-likescount">{{ post.like_users.count }}</span>
-  </form>
+      <span id="post-likescount">{{ post.like_users.count }}</span>
+    </form>
+  </div>
 
   <div class="d-flex justify-content-center">
 
@@ -69,8 +70,11 @@
 
   <form action="{% url 'posts:comment_create' post.pk %}" method="POST">
     {% csrf_token %}
-    {{ comment_form.as_p }}
-    <input type="submit" value="댓글 작성" class="btn btn-sm btn-outline-primary">
+    {% for field in comment_form %}
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+    {% endfor %}
+    <input type="submit" value="댓글 작성" class="btn btn-sm btn-outline-primary mt-3">
   </form>
 
   <hr>
@@ -78,39 +82,44 @@
   {% for comment in comments %}
     <p>작성자 - {{ comment.user }}</p>
     <p id="comment-content-{{ comment.pk }}">{{ comment.content }}</p>
-
-   {% if request.user.is_authenticated %}
-       <form class="comment-likeform" id="commentlike-{{ comment.pk }}" data-comment-id="{{ comment.pk }}" data-post-id="{{ post.pk }}">
-         {% csrf_token %}
-         {% if request.user in comment.like_users.all %}
-           <button type="submit" class="btn btn-link text-danger"><i class="bi bi-heart-fill"></i></button>
-         {% else %}
-           <button type="submit" class="btn btn-link text-danger"><i class="bi bi-heart"></i></button>
-         {% endif %}
-     {% else %}
-       <button type="submit" class=" btn btn-link text-danger" disabled="disabled"><i class="bi bi-heart"></i></button> 
-     {% endif %}
-       <span class="like-{{ comment.pk }}">{{ comment.like_users.count }}</span>
-     </form>
-
-    <div class="">
-      {% if request.user == comment.user %}
-        <div class="d-flex">
-          <form action="{% url 'posts:comment_delete' post.pk comment.pk %}" method="POST" class="me-3">
-            {% csrf_token %}
-            <input type="submit" value="댓글 삭제" class="btn btn-sm btn-outline-danger" onclick="return confirm('삭제하시겠습니까?')">
-          </form>
-          <input type="button" value="댓글 수정" class="comment-edit-btn btn btn-sm btn-outline-primary" data-post-id="{{ post.pk }}" data-comment-id="{{ comment.pk }}">
-        </div>
-        <form class="comment-edit-form my-3" id="comment-edit-form-{{ comment.pk }}" data-post-id="{{ post.pk }}" data-comment-id="{{ comment.pk }}" hidden>
-          {% csrf_token %}
-          {{ comment_updateform.as_p }}
-          <input type="submit" value="수정" class="update btn btn-sm btn-outline-primary">
-          <input type="button" value="취소" class="cancel btn btn-sm btn-outline-secondary" data-comment-id="{{ comment.pk }}">
-        </form>
+  
+    <div class="mb-1">
+    {% if request.user.is_authenticated %}
+      <form class="comment-likeform" id="commentlike-{{ comment.pk }}" data-comment-id="{{ comment.pk }}" data-post-id="{{ post.pk }}">
+      {% csrf_token %}
+      {% if request.user in comment.like_users.all %}
+        <button type="submit" class="p-0 btn btn-link text-danger"><i class="bi bi-heart-fill"></i></button>
+      {% else %}
+        <button type="submit" class="p-0 btn btn-link text-danger"><i class="bi bi-heart"></i></button>
       {% endif %}
+    {% else %}
+        <button type="submit" class="p-0 btn btn-link text-danger" disabled="disabled"><i class="bi bi-heart"></i></button> 
+    {% endif %}
+        <span class="like-{{ comment.pk }}">{{ comment.like_users.count }}</span>
+      </form>
     </div>
-    <hr>
+
+  <div>
+    {% if request.user == comment.user %}
+      <div class="d-flex">
+        <form action="{% url 'posts:comment_delete' post.pk comment.pk %}" method="POST" class="me-3">
+          {% csrf_token %}
+          <input type="submit" value="댓글 삭제" class="btn btn-sm btn-outline-danger" onclick="onDelete()">
+        </form>
+        <input type="button" value="댓글 수정" class="comment-edit-btn btn btn-sm btn-outline-primary" data-post-id="{{ post.pk }}" data-comment-id="{{ comment.pk }}">
+      </div>
+      <form class="comment-edit-form my-3" id="comment-edit-form-{{ comment.pk }}" data-post-id="{{ post.pk }}" data-comment-id="{{ comment.pk }}" hidden>
+        {% csrf_token %}
+        {% for field in comment_updateform %}
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+        {% endfor %}
+        <input type="submit" value="수정" class="update btn btn-sm btn-outline-primary">
+        <input type="button" value="취소" class="cancel btn btn-sm btn-outline-secondary" data-comment-id="{{ comment.pk }}">
+      </form>
+    {% endif %}
+  </div>
+  <hr>
   {% endfor %}
   <script>
     const postform = document.querySelector('#post-likeform')
@@ -183,9 +192,9 @@
       comment.addEventListener('click', (event) => {
         const commentId = event.target.dataset.commentId
         const commentUpdateDiv = document.querySelector(`#comment-edit-form-${commentId}`)
-        const contentTextArea = document.querySelector(`#comment-edit-form-${commentId}>p>textarea`)
+        const contentTextArea = document.querySelector(`#comment-edit-form-${commentId}>textarea`)
         commentUpdateDiv.hidden = false
-        contentTextArea.textContent = document.querySelector(`#comment-content-${commentId}`).textContent
+        contentTextArea.value = document.querySelector(`#comment-content-${commentId}`).textContent
       })
     })
     
@@ -196,7 +205,7 @@
         const postId = event.target.dataset.postId
         const commentId = event.target.dataset.commentId
         const data = {
-          content: document.querySelector(`#comment-edit-form-${commentId}>p>textarea`).value,
+          content: document.querySelector(`#comment-edit-form-${commentId}>textarea`).value,
         }
         axios({
           method:'post',
@@ -205,8 +214,10 @@
           data: JSON.stringify(data),
         })
           .then((response) => {
-            updateBtn.hidden = true
-            document.querySelector(`#comment-content-${commentId}`).textContent = data['content']
+            if (window.confirm('댓글 수정하시겠습니까?')) {
+              updateBtn.hidden = true
+              document.querySelector(`#comment-content-${commentId}`).textContent = data['content']
+            }
           })
           .catch((error) => {
             console.log(error.response)
@@ -223,5 +234,11 @@
       })
     })
 
+    // 댓글 삭제
+    const onDelete = () => {
+      if (window.confirm('삭제하시겠습니까?')) {
+        alert('삭제되었습니다.')
+      } 
+    }
   </script>
 {% endblock content %}
