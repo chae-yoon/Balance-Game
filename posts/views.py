@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from .models import Post, Comment
 from .forms import PostForm, CommentForm
 from django.contrib.auth.decorators import login_required
+import json
 
 # Create your views here.
 def index(request):
@@ -85,7 +86,7 @@ def comment_create(request, post_pk):
         comment = comment_form.save(commit=False)
         comment.post = post
         comment.user = request.user
-        comment.save()
+        comment.save()  
     return redirect('posts:detail', post.pk)
 
 
@@ -95,6 +96,7 @@ def comment_delete(request, post_pk, comment_pk):
     if request.user == comment.user:
         comment.delete()
     return redirect('posts:detail', post_pk)
+    
     
 @login_required
 def comment_like(request, post_pk, comment_pk):
@@ -108,5 +110,21 @@ def comment_like(request, post_pk, comment_pk):
     context = {
         'is_liked': is_liked,
         'likes_count': comment.like_users.count(),
+    }
+    return JsonResponse(context)
+
+
+def comment_update(request, post_pk, comment_pk):
+    comment = Comment.objects.get(pk=comment_pk)
+    
+    if request.user == comment.user:
+        if request.method == 'POST':
+            r = list(request.POST.keys())
+            js = json.loads(r[0])
+            comment.content = js['content']
+            comment.save()
+
+    context = {
+        'content': comment.content,
     }
     return JsonResponse(context)
